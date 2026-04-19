@@ -1,0 +1,79 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "대시보드";
+}
+
+<h2 class="mb-4">운영 대시보드</h2>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">전체 교육과정</h6>
+                <h3 class="mb-0">@Model.Dashboard.TotalClasses</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">진행 중 교육과정</h6>
+                <h3 class="mb-0">@Model.Dashboard.OngoingClasses</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">열린 안건</h6>
+                <h3 class="mb-0">@Model.Dashboard.OpenAgendas</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">기한 초과 조치사항</h6>
+                <h3 class="text-danger mb-0">@Model.Dashboard.OverdueActionItems</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-2">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="mb-3">교육과정 진행률</h6>
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>진행중 비율</span>
+                    <span>@Model.Dashboard.OngoingRate%</span>
+                </div>
+                <div class="progress mb-3" role="progressbar">
+                    <div class="progress-bar bg-info" style="width: @Model.Dashboard.OngoingRate%"></div>
+                </div>
+                <div class="small text-muted">
+                    계획 @Model.Dashboard.PlannedClasses / 진행 @Model.Dashboard.OngoingClasses / 완료 @Model.Dashboard.CompletedClasses
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="mb-3">안건 처리 현황</h6>
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>결정 완료 비율</span>
+                    <span>@Model.Dashboard.AgendaClosedRate%</span>
+                </div>
+                <div class="progress mb-3" role="progressbar">
+                    <div class="progress-bar bg-success" style="width: @Model.Dashboard.AgendaClosedRate%"></div>
+                </div>
+                <div class="small text-muted">
+                    열림 @Model.Dashboard.OpenAgendas / 결정 @Model.Dashboard.DecidedAgendas / 보류 @Model.Dashboard.OnHoldAgendas
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,133 @@
+@page
+@model 프로젝트관리.Pages.Sessions.IndexModel
+@using 프로젝트관리.Models
+@{
+    ViewData["Title"] = "세션";
+    var isEdit = Model.EditId.HasValue;
+    var showRegistrationPanel = isEdit || !ViewData.ModelState.IsValid;
+    string BadgeClass(SessionStatus status) => status switch
+    {
+        SessionStatus.Scheduled => "badge bg-primary",
+        SessionStatus.Completed => "badge bg-success",
+        SessionStatus.Cancelled => "badge bg-danger",
+        _ => "badge bg-light text-dark"
+    };
+    string StatusText(SessionStatus status) => status switch
+    {
+        SessionStatus.Scheduled => "예정",
+        SessionStatus.Completed => "완료",
+        SessionStatus.Cancelled => "취소",
+        _ => status.ToString()
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">세션 관리</h3>
+    <span class="text-muted small">총 @Model.Items.Count 건</span>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <select asp-for="ClassIdFilter" asp-items="Model.ClassOptions" class="form-select">
+            <option value="">전체 교육과정</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-primary">필터</button>
+    </div>
+</form>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">세션 목록</div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>교육과정</th>
+                            <th>일자</th>
+                            <th>시간</th>
+                            <th>장소</th>
+                            <th>상태</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.Class?.ClassName</td>
+                            <td>@item.SessionDate</td>
+                            <td>@item.StartTime ~ @item.EndTime</td>
+                            <td>@item.Location</td>
+                            <td><span class="@BadgeClass(item.Status)">@StatusText(item.Status)</span></td>
+                            <td>
+                                <a asp-page="/Sessions/Index" asp-route-editId="@item.SessionId" asp-route-classIdFilter="@Model.ClassIdFilter" class="btn btn-outline-primary btn-sm">수정</a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Items.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">세션이 없습니다.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">@(isEdit ? "세션 수정" : "세션 등록")</span>
+                @if (!showRegistrationPanel)
+                {
+                    <button type="button" class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style="width:2.25rem;height:2.25rem;padding:0;"
+                            data-bs-toggle="collapse" data-bs-target="#sessionRegCollapse"
+                            aria-expanded="false" aria-controls="sessionRegCollapse" title="등록 폼 열기">
+                        +
+                    </button>
+                }
+            </div>
+            <div id="sessionRegCollapse" class="collapse @(showRegistrationPanel ? "show" : "")">
+            <div class="card-body">
+                <form method="post" asp-page-handler="@(isEdit ? "Edit" : "Create")">
+                    <input type="hidden" asp-for="Input.SessionId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-2">
+                        <label asp-for="Input.ClassId" class="form-label"></label>
+                        <select asp-for="Input.ClassId" asp-items="Model.ClassOptions" class="form-select"></select>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.SessionDate" class="form-label"></label>
+                        <input asp-for="Input.SessionDate" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.StartTime" class="form-label"></label>
+                        <input asp-for="Input.StartTime" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.EndTime" class="form-label"></label>
+                        <input asp-for="Input.EndTime" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.Location" class="form-label"></label>
+                        <input asp-for="Input.Location" class="form-control" placeholder="예: 본관 3층 301호" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Input.Status" class="form-label"></label>
+                        <select asp-for="Input.Status" asp-items="Html.GetEnumSelectList<SessionStatus>()" class="form-select"></select>
+                    </div>
+                    <button class="btn btn-primary" type="submit">저장</button>
+                    <a asp-page="/Sessions/Index" asp-route-classIdFilter="@Model.ClassIdFilter" class="btn btn-outline-secondary">초기화</a>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

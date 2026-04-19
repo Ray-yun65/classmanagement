@@ -1,0 +1,172 @@
+@page
+@model 프로젝트관리.Pages.Agendas.IndexModel
+@using 프로젝트관리.Models
+@{
+    ViewData["Title"] = "안건";
+    var isEdit = Model.EditId.HasValue;
+    var showRegistrationPanel = isEdit || !ViewData.ModelState.IsValid;
+    string 상태배지(AgendaStatus status) => status switch
+    {
+        AgendaStatus.Open => "badge bg-secondary",
+        AgendaStatus.Decided => "badge bg-success",
+        AgendaStatus.OnHold => "badge bg-warning text-dark",
+        _ => "badge bg-light text-dark"
+    };
+    string 상태명(AgendaStatus status) => status switch
+    {
+        AgendaStatus.Open => "열림",
+        AgendaStatus.Decided => "결정",
+        AgendaStatus.OnHold => "보류",
+        _ => status.ToString()
+    };
+    string 우선순위명(AgendaPriority priority) => priority switch
+    {
+        AgendaPriority.High => "높음",
+        AgendaPriority.Medium => "보통",
+        AgendaPriority.Low => "낮음",
+        _ => priority.ToString()
+    };
+}
+
+<h3 class="mb-3">안건 관리</h3>
+
+<form method="get" class="mb-2">
+    <div class="input-group">
+        <select asp-for="MeetingFilterId" asp-items="Model.MeetingOptions" class="form-select">
+            <option value="">전체 회의</option>
+        </select>
+        <button class="btn btn-outline-primary" type="submit">필터</button>
+    </div>
+</form>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card mb-3">
+            <div class="card-header">안건 목록</div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>제목</th>
+                            <th>상태</th>
+                            <th>우선순위</th>
+                            <th>담당자</th>
+                            <th>기한</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr class="@(item.IsOverdue ? "table-danger" : string.Empty)">
+                            <td>@item.Title</td>
+                            <td><span class="@상태배지(item.Status)">@상태명(item.Status)</span></td>
+                            <td>@우선순위명(item.Priority)</td>
+                            <td>@item.Owner</td>
+                            <td>@item.DueDate</td>
+                            <td>
+                                <a asp-page="/Agendas/Index" asp-route-editId="@item.AgendaId" asp-route-meetingFilterId="@Model.MeetingFilterId" class="btn btn-outline-primary btn-sm">수정</a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Items.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">안건이 없습니다.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">@(isEdit ? "안건 수정" : "안건 등록")</span>
+                @if (!showRegistrationPanel)
+                {
+                    <button type="button" class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style="width:2.25rem;height:2.25rem;padding:0;"
+                            data-bs-toggle="collapse" data-bs-target="#agendaRegCollapse"
+                            aria-expanded="false" aria-controls="agendaRegCollapse" title="등록 폼 열기">
+                        +
+                    </button>
+                }
+            </div>
+            <div id="agendaRegCollapse" class="collapse @(showRegistrationPanel ? "show" : "")">
+            <div class="card-body">
+                <form method="post" asp-page-handler="@(isEdit ? "Edit" : "Create")">
+                    <input type="hidden" asp-for="Input.AgendaId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="mb-2">
+                        <label asp-for="Input.MeetingId" class="form-label"></label>
+                        <select asp-for="Input.MeetingId" asp-items="Model.MeetingOptions" class="form-select"></select>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.Title" class="form-label"></label>
+                        <input asp-for="Input.Title" class="form-control" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.Description" class="form-label"></label>
+                        <textarea asp-for="Input.Description" class="form-control"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.RelatedClassId" class="form-label"></label>
+                        <select asp-for="Input.RelatedClassId" asp-items="Model.ClassOptions" class="form-select">
+                            <option value="">(없음)</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Input.RelatedSessionId" class="form-label"></label>
+                        <select asp-for="Input.RelatedSessionId" asp-items="Model.SessionOptions" class="form-select">
+                            <option value="">(없음)</option>
+                        </select>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label asp-for="Input.Requester" class="form-label"></label>
+                            <input asp-for="Input.Requester" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Input.Owner" class="form-label"></label>
+                            <input asp-for="Input.Owner" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                        <div class="col-md-4">
+                            <label asp-for="Input.Priority" class="form-label"></label>
+                            <select asp-for="Input.Priority" asp-items="Html.GetEnumSelectList<AgendaPriority>()" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Input.Status" class="form-label"></label>
+                            <select asp-for="Input.Status" asp-items="Html.GetEnumSelectList<AgendaStatus>()" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Input.DueDate" class="form-label"></label>
+                            <input asp-for="Input.DueDate" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label asp-for="Input.Decision" class="form-label"></label>
+                        <textarea asp-for="Input.Decision" class="form-control"></textarea>
+                    </div>
+                    <div class="mt-2">
+                        <label asp-for="Input.ActionItem" class="form-label"></label>
+                        <textarea asp-for="Input.ActionItem" class="form-control"></textarea>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input asp-for="Input.IsReflected" class="form-check-input" />
+                        <label asp-for="Input.IsReflected" class="form-check-label"></label>
+                    </div>
+                    <button class="btn btn-primary mt-3" type="submit">저장</button>
+                    <a asp-page="/Agendas/Index" asp-route-meetingFilterId="@Model.MeetingFilterId" class="btn btn-outline-secondary mt-3">초기화</a>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
