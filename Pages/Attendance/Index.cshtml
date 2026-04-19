@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "참석";
     var isEdit = Model.EditId.HasValue;
-    var showRegistrationPanel = isEdit || !ViewData.ModelState.IsValid;
     string BadgeClass(AttendanceStatus status) => status switch
     {
         AttendanceStatus.Attended => "badge bg-success",
@@ -64,18 +63,7 @@
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">@(isEdit ? "참석 수정" : "참석 등록")</span>
-                @if (!showRegistrationPanel)
-                {
-                    <button type="button" class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
-                            style="width:2.25rem;height:2.25rem;padding:0;"
-                            data-bs-toggle="collapse" data-bs-target="#attendanceRegCollapse"
-                            aria-expanded="false" aria-controls="attendanceRegCollapse" title="등록 폼 열기">
-                        +
-                    </button>
-                }
-            </div>
-            <div id="attendanceRegCollapse" class="collapse @(showRegistrationPanel ? "show" : "")">
+            <div class="card-header">@(isEdit ? "참석 수정" : "참석 등록")</div>
             <div class="card-body">
                 <form method="post" asp-page-handler="@(isEdit ? "Edit" : "Create")">
                     <input type="hidden" asp-for="Input.AttendanceId" />
@@ -99,7 +87,6 @@
                     <button class="btn btn-primary" type="submit">저장</button>
                     <a asp-page="/Attendance/Index" class="btn btn-outline-secondary">초기화</a>
                 </form>
-            </div>
             </div>
         </div>
     </div>

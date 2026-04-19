@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "회의";
     var meetingEdit = Model.EditMeetingId.HasValue;
-    var showRegistrationPanel = meetingEdit || !ViewData.ModelState.IsValid;
     string MeetingTypeBadge(MeetingType type) => type switch
     {
         MeetingType.Regular => "badge bg-primary",
@@ -62,19 +61,7 @@
 
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">@(meetingEdit ? "회의 수정" : "회의 등록")</span>
-                @if (!showRegistrationPanel)
-                {
-                    <button type="button" class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
-                            style="width:2.25rem;height:2.25rem;padding:0;"
-                            data-bs-toggle="collapse" data-bs-target="#meetingRegCollapse"
-                            aria-expanded="false" aria-controls="meetingRegCollapse" title="등록 폼 열기">
-                        +
-                    </button>
-                }
-            </div>
-            <div id="meetingRegCollapse" class="collapse @(showRegistrationPanel ? "show" : "")">
+            <div class="card-header">@(meetingEdit ? "회의 수정" : "회의 등록")</div>
             <div class="card-body">
                 <form method="post" asp-page-handler="@(meetingEdit ? "EditMeeting" : "CreateMeeting")">
                     <input type="hidden" asp-for="MeetingInput.MeetingId" />
@@ -94,7 +81,6 @@
                     <button class="btn btn-primary" type="submit">저장</button>
                     <a asp-page="/Meetings/Index" class="btn btn-outline-secondary">초기화</a>
                 </form>
-            </div>
             </div>
         </div>
     </div>

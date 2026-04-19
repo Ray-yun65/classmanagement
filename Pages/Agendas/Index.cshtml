@@ -4,7 +4,6 @@
 @{
     ViewData["Title"] = "안건";
     var isEdit = Model.EditId.HasValue;
-    var showRegistrationPanel = isEdit || !ViewData.ModelState.IsValid;
     string 상태배지(AgendaStatus status) => status switch
     {
         AgendaStatus.Open => "badge bg-secondary",
@@ -81,19 +80,7 @@
 
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">@(isEdit ? "안건 수정" : "안건 등록")</span>
-                @if (!showRegistrationPanel)
-                {
-                    <button type="button" class="btn btn-primary btn-sm rounded-circle d-inline-flex align-items-center justify-content-center"
-                            style="width:2.25rem;height:2.25rem;padding:0;"
-                            data-bs-toggle="collapse" data-bs-target="#agendaRegCollapse"
-                            aria-expanded="false" aria-controls="agendaRegCollapse" title="등록 폼 열기">
-                        +
-                    </button>
-                }
-            </div>
-            <div id="agendaRegCollapse" class="collapse @(showRegistrationPanel ? "show" : "")">
+            <div class="card-header">@(isEdit ? "안건 수정" : "안건 등록")</div>
             <div class="card-body">
                 <form method="post" asp-page-handler="@(isEdit ? "Edit" : "Create")">
                     <input type="hidden" asp-for="Input.AgendaId" />
@@ -161,7 +148,6 @@
                     <button class="btn btn-primary mt-3" type="submit">저장</button>
                     <a asp-page="/Agendas/Index" asp-route-meetingFilterId="@Model.MeetingFilterId" class="btn btn-outline-secondary mt-3">초기화</a>
                 </form>
-            </div>
             </div>
         </div>
     </div>
